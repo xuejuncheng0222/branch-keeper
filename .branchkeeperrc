@@ -1,0 +1,18 @@
+{
+  "protectedBranches": [
+    "main",
+    "master"
+  ],
+  "remotes": [
+    "origin"
+  ],
+  "silent": false,
+  "ignore": [],
+  "listOnly": false,
+  "confirm": true,
+  "force": false,
+  "ffOnly": true,
+  "mergeIgnore": [],
+  "fetchIgnore": [],
+  "fetchForce": false
+}
