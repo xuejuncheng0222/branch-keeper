@@ -1,16 +1,22 @@
 {
   "name": "branch-keeper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Git 分支管理工具",
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "bk": "./bin/bk.js"
+    "bk": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "build": "rollup -c"
   },
   "keywords": [
     "git",
@@ -26,7 +32,12 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "jest": "^29.5.0"
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "jest": "^29.5.0",
+    "rollup": "^4.40.2",
+    "rollup-plugin-preserve-shebang": "^1.0.1"
   },
   "engines": {
     "node": ">=14.0.0"
