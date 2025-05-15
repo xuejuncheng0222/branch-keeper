@@ -69,7 +69,7 @@ program
   .option("--debug", "打印调试日志")
   .action(async (options) => {
     try {
-      const config = loadConfig();
+      const config = loadConfig(options);
       const finalOptions = mergeOptions(options, config);
       await cleanBranches(finalOptions);
     } catch (error) {
@@ -88,7 +88,7 @@ program
   .option("--debug", "打印调试日志")
   .action(async (options) => {
     try {
-      const config = loadConfig();
+      const config = loadConfig(options);
       const finalOptions = {
         ...options,
         ffOnly: options.ff ?? config.ffOnly ?? true,
@@ -110,7 +110,7 @@ program
   .option("--debug", "打印调试日志")
   .action(async (options) => {
     try {
-      const config = loadConfig();
+      const config = loadConfig(options);
       const finalOptions = {
         ...options,
         force: options.force ?? config.force ?? false,

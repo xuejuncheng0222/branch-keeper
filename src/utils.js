@@ -129,7 +129,7 @@ export const log = (level, message, options = {}, ...args) => {
   if (!alwaysPrint.includes(level.toLowerCase()) && options.debug !== true) {
     return;
   }
-  const timestamp = new Date().toISOString();
+  const timestamp = new Date().toLocaleString();
   const prefix = `[${timestamp}] ${level.toUpperCase()}:`;
   console.log(prefix, message, ...args);
 };

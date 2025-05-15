@@ -20,12 +20,12 @@ import {
  */
 const checkWorkingDirectory = async (checkCommit = false) => {
   if (!(await isGitRepository())) {
-    log("error", "当前目录不是 Git 仓库");
+    console.error("当前目录不是 Git 仓库");
     return false;
   }
 
   if (checkCommit && (await hasUncommittedChanges())) {
-    log("error", "工作区有未提交的更改，请先提交或暂存更改");
+    console.error("工作区有未提交的更改，请先提交或暂存更改");
     return false;
   }
 
@@ -102,7 +102,6 @@ const deleteBranch = async (branch, force = false) => {
  */
 export const cleanBranches = async (options) => {
   const {
-    remotes = ["origin"],
     ignore = [],
     force = false,
     listOnly = false,
@@ -116,13 +115,14 @@ export const cleanBranches = async (options) => {
 
   /**当前分支名 */
   const currentBranch = await getCurrentBranch();
+  log("info", `当前分支 ${currentBranch}`, options);
   /**本地分支及其上游分支列表 */
   let trackingBranches = [];
   try {
     const { stdout } = await execGitCommand(
       'git for-each-ref --format="%(refname:short) %(upstream:short)" refs/heads'
     );
-    log("info", `获取本地分支及其上游分支列表: ${stdout}`, options);
+    log("info", `获取本地分支及其上游分支列表: \n${stdout}`, options);
     trackingBranches = stdout
       .split("\n")
       .map((line) => line.trim().split(" "))
@@ -166,13 +166,13 @@ export const cleanBranches = async (options) => {
   }
 
   if (branchesToDelete.length === 0) {
-    log("info", "没有需要清理的分支", options);
+    console.info("没有需要清理的分支");
     return;
   }
 
   if (!silent) {
-    log("info", `找到 ${branchesToDelete.length} 个可清理的分支:`, options);
-    branchesToDelete.forEach((branch) => log("info", `- ${branch}`, options));
+    console.info(`找到 ${branchesToDelete.length} 个可清理的分支:`);
+    branchesToDelete.forEach((branch) => console.info(`- ${branch}`));
   }
 
   if (listOnly) {
@@ -189,7 +189,7 @@ export const cleanBranches = async (options) => {
 
     if (!confirm) {
       log("info", "操作已取消", options);
-      return;
+      return process.exit(1);
     }
   }
 
@@ -206,10 +206,6 @@ export const cleanBranches = async (options) => {
   }
 
   if (!silent) {
-    log(
-      "info",
-      `清理完成: 成功 ${successCount} 个, 失败 ${failCount} 个`,
-      options
-    );
+    console.info(`清理完成: 成功 ${successCount} 个, 失败 ${failCount} 个`);
   }
 };

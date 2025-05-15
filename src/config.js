@@ -7,6 +7,8 @@ import fs from "fs-extra";
 import path from "path";
 import yaml from "js-yaml";
 
+import { log } from "./utils.js";
+
 // 默认配置
 const DEFAULT_CONFIG = {
   protectedBranches: ["main", "master", "develop"], // 受保护的分支
@@ -59,18 +61,18 @@ const validateConfig = (config) => {
 
 /**
  * 加载配置文件
- * @param {string} [customFile] - 可选，自定义配置文件名
+ * @param {boolean} options.debug - 是否开启调试模式
  * @returns {Object} 配置对象
  */
-const loadConfig = (customFile) => {
-  const configFiles = customFile
-    ? [customFile]
-    : [
-        ".branchkeeperrc.json",
-        ".branchkeeperrc.yaml",
-        ".branchkeeperrc.yml",
-        ".branchkeeperrc",
-      ];
+const loadConfig = (options) => {
+  const configFiles = [
+    ".branchkeeperrc.json",
+    ".branchkeeperrc.yaml",
+    ".branchkeeperrc.yml",
+    ".branchkeeperrc",
+  ];
+
+  log("info", "支持配置文件名称", options, configFiles);
 
   for (const file of configFiles) {
     try {
@@ -85,17 +87,17 @@ const loadConfig = (customFile) => {
         } else {
           config = JSON.parse(content);
         }
-        console.info("提示: 加载配置文件", file);
+        log("info", "提示: 加载配置文件", options, file);
         // 验证并返回配置
         return validateConfig(config);
       }
     } catch (error) {
-      console.warn(`警告: 加载配置文件 ${file} 失败:`, error.message);
+      log("warn", `警告: 加载配置文件 ${file} 失败:${error.message}`, options);
       continue;
     }
   }
 
-  console.info("提示: 未找到配置文件，使用默认配置");
+  log("info", "提示: 未找到配置文件，使用默认配置", options, DEFAULT_CONFIG);
   return DEFAULT_CONFIG;
 };
 
