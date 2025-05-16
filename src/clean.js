@@ -7,7 +7,7 @@ import {
   execGitCommand,
   isGitRepository,
   getCurrentBranch,
-  branchExists,
+  /*branchExists,*/
   hasUncommittedChanges,
   isProtectedBranch,
   log,
@@ -49,24 +49,6 @@ const getLocalBranches = async () => {
   } catch (error) {
     log("error", "获取本地分支列表失败");
     return [];
-  }
-};
-
-/**
- * 检查远程分支是否存在
- * @param {string} branch - 分支名
- * @param {string} remote - 远程仓库名
- * @returns {Promise<boolean>} 远程分支是否存在
- */
-const checkRemoteBranch = async (branch, remote) => {
-  try {
-    const { stdout } = await execGitCommand(
-      `git ls-remote --heads ${remote} ${branch}`
-    );
-    log("info", `检查远程分支 ${branch} 是否存在: ${stdout.trim().length > 0}`);
-    return stdout.trim().length > 0;
-  } catch (error) {
-    return false;
   }
 };
 
@@ -134,6 +116,30 @@ export const cleanBranches = async (options) => {
     return;
   }
 
+  /** 统计所有 remote */
+  const remotesSet = new Set(
+    trackingBranches.map(([_, upstream]) => upstream.split("/")[0])
+  );
+  /** 批量获取所有远程分支列表 */
+  const remoteBranchMap = new Map();
+  for (const remote of remotesSet) {
+    try {
+      const { stdout } = await execGitCommand(
+        `git ls-remote --heads ${remote}`
+      );
+      const branchSet = new Set(
+        stdout
+          .split("\n")
+          .map((line) => line.split("\t")[1]?.replace("refs/heads/", ""))
+          .filter(Boolean)
+      );
+      remoteBranchMap.set(remote, branchSet);
+    } catch (error) {
+      console.error(`获取远程 ${remote} 分支列表失败: ${error.message}`);
+      remoteBranchMap.set(remote, new Set());
+    }
+  }
+
   /**需要删除的分支列表 */
   const branchesToDelete = [];
 
@@ -157,8 +163,9 @@ export const cleanBranches = async (options) => {
     // 远程分支名
     const remoteBranch = branchParts.join("/");
     log("info", `检查远程分支 ${remoteBranch} 是否存在: ${remote}`, options);
-    // 检查远程分支是否存在
-    const exists = await checkRemoteBranch(remoteBranch, remote);
+    // 优化：直接查 Map
+    const branchSet = remoteBranchMap.get(remote);
+    const exists = branchSet && branchSet.has(remoteBranch);
     // 不存在则加入删除列表
     if (!exists) {
       branchesToDelete.push(branch);
