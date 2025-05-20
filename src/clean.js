@@ -72,6 +72,22 @@ const deleteBranch = async (branch, force = false) => {
   }
 };
 
+const updateRemoteBranch = async (silent, options) => {
+  // 先执行 git fetch -p 更新远程分支信息
+  try {
+    if (!silent) {
+      log("info", "正在更新远程分支信息...", options);
+    }
+    await execGitCommand("git fetch -p");
+    if (!silent) {
+      log("info", "远程分支信息更新完成", options);
+    }
+  } catch (error) {
+    log("error", `更新远程分支信息失败: ${error.message}`, options);
+    return;
+  }
+};
+
 /**
  * 清理本地分支
  * @param {Object} options - 配置选项
@@ -92,20 +108,6 @@ export const cleanBranches = async (options) => {
   } = options;
 
   if (!(await checkWorkingDirectory())) {
-    return;
-  }
-
-  // 先执行 git fetch -p 更新远程分支信息
-  try {
-    if (!silent) {
-      log("info", "正在更新远程分支信息...", options);
-    }
-    await execGitCommand("git fetch -p");
-    if (!silent) {
-      log("info", "远程分支信息更新完成", options);
-    }
-  } catch (error) {
-    log("error", `更新远程分支信息失败: ${error.message}`, options);
     return;
   }
 
@@ -227,6 +229,7 @@ export const cleanBranches = async (options) => {
   }
 
   if (!silent) {
+    updateRemoteBranch(silent, options);
     console.info(`清理完成: 成功 ${successCount} 个, 失败 ${failCount} 个`);
   }
   process.exit(0);
