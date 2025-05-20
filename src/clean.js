@@ -95,6 +95,20 @@ export const cleanBranches = async (options) => {
     return;
   }
 
+  // 先执行 git fetch -p 更新远程分支信息
+  try {
+    if (!silent) {
+      log("info", "正在更新远程分支信息...", options);
+    }
+    await execGitCommand("git fetch -p");
+    if (!silent) {
+      log("info", "远程分支信息更新完成", options);
+    }
+  } catch (error) {
+    log("error", `更新远程分支信息失败: ${error.message}`, options);
+    return;
+  }
+
   /**当前分支名 */
   const currentBranch = await getCurrentBranch();
   log("info", `当前分支 ${currentBranch}`, options);
@@ -196,7 +210,7 @@ export const cleanBranches = async (options) => {
 
     if (!confirm) {
       log("info", "操作已取消", options);
-      return process.exit(1);
+      return process.exit(0);
     }
   }
 
@@ -215,4 +229,5 @@ export const cleanBranches = async (options) => {
   if (!silent) {
     console.info(`清理完成: 成功 ${successCount} 个, 失败 ${failCount} 个`);
   }
+  process.exit(0);
 };
