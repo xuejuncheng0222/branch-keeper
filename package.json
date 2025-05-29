@@ -3,7 +3,7 @@
   "version": "1.0.4",
   "description": "Git 分支管理工具",
   "type": "module",
-  "main": "src/index.js",
+  "main": "bin/bk.js",
   "bin": {
     "bk": "dist/cli.js"
   },
@@ -26,9 +26,12 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "chalk": "^5.4.1",
     "commander": "^11.0.0",
     "fs-extra": "^11.1.1",
-    "js-yaml": "^4.1.0"
+    "inquirer": "^12.6.1",
+    "js-yaml": "^4.1.0",
+    "ora": "^8.2.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",

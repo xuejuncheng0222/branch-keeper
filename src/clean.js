@@ -13,6 +13,8 @@ import {
   log,
 } from "./utils.js";
 
+import ora from "ora";
+
 /**
  * 检查工作目录状态 合并等操作需求工作区干净，删除分支的操作不需要
  * @param {boolean} checkCommit - 是否检查未提交的更改
@@ -99,6 +101,7 @@ const updateRemoteBranch = async (silent, options) => {
  * @returns {Promise<void>}
  */
 export const cleanBranches = async (options) => {
+  const spinner = ora({ text: "正在处理...", discardStdin: false }).start();
   const {
     ignore = [],
     force = false,
@@ -189,11 +192,15 @@ export const cleanBranches = async (options) => {
   }
 
   if (branchesToDelete.length === 0) {
+    spinner.text = "";
+    spinner.stop();
     console.info("没有需要清理的分支");
     return;
   }
 
   if (!silent) {
+    spinner.text = "";
+    spinner.stop();
     console.info(`找到 ${branchesToDelete.length} 个可清理的分支:`);
     branchesToDelete.forEach((branch) => console.info(`- ${branch}`));
   }
