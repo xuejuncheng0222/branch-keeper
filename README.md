@@ -72,6 +72,37 @@ bk clean --list-only --debug
 bk clean --force --no-confirm
 ```
 
+### 2. 选择删除（单个|多个）分支（delete）
+
+`bk delete` 用于**交互式删除本地分支**，支持单选和多选模式。
+
+#### 基本用法
+
+```bash
+bk delete
+```
+
+#### 常用参数
+
+- `-m, --multi`
+  启用多选模式，可以同时选择多个分支删除。
+
+- `-f, --force`
+  强制删除分支，不需要确认。
+
+- `--debug`
+  打印调试日志，输出详细信息。
+
+#### 示例
+
+```bash
+# 启用多选模式删除分支
+bk delete --multi
+
+# 强制删除分支，不需要确认
+bk delete --force
+```
+
 #### 配置文件支持
 
 你可以在项目根目录添加 `.branchkeeperrc` `.branchkeeperrc.json` `.branchkeeperrc.yaml` `.branchkeeperrc.yml`文件，配置默认参数（如受保护分支、忽略分支等），命令行参数会覆盖配置文件。
