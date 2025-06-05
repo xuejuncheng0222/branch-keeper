@@ -6,6 +6,7 @@ import { cleanBranches } from "../src/clean.js";
 // import { fetchAllBranches } from "../src/fetch.js";
 import { loadConfig } from "../src/config.js";
 import { deleteBranches } from "../src/delete.js";
+import { switchBranch } from "../src/switch.js";
 
 /**
  * 处理命令执行错误
@@ -78,6 +79,7 @@ program
     }
   });
 
+/**交互式删除分支 */
 program
   .command("delete")
   .description("交互式删除分支")
@@ -85,6 +87,13 @@ program
   .option("-m, --multi", "允许多选删除")
   .option("--debug", "打印调试日志")
   .action(deleteBranches);
+
+/**交互式切换分支 */
+program
+  .command("checkout")
+  .description("交互式切换分支")
+  .option("--debug", "打印调试日志")
+  .action(switchBranch);
 
 // // Merge 命令
 // program
@@ -137,8 +146,8 @@ program.addHelpText(
   `
 示例:
   $ bk clean --remote origin --ignore main develop
-  $ bk merge --source feature --target main develop
-  $ bk fetch --remote origin --ignore main
+  $ bk delete --multi
+  $ bk checkout
   `
 );
 

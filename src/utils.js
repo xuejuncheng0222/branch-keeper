@@ -214,3 +214,93 @@ export const updateRemoteBranch = async (silent, options) => {
     return;
   }
 };
+
+/**
+ * 切换分支
+ * @param {string} branch - 目标分支名
+ * @param {Object} options - 配置
+ * @param {boolean} options.debug 是否开启日志模式
+ * @param {boolean} force - 是否强制切换（丢弃本地修改）
+ * @returns {Promise<boolean>} 是否切换成功
+ */
+export const checkoutBranch = async (branch, options, force = false) => {
+  try {
+    // 检查是否有未提交的更改
+    if (await hasUncommittedChanges()) {
+      if (!force) {
+        console.warn("工作区有未提交的更改，请先提交或暂存更改");
+        return false;
+      }
+      // 强制切换时，先重置工作区
+      await execGitCommand("git reset --hard");
+    }
+
+    // 执行切换分支命令
+    await execGitCommand(`git checkout ${branch}`);
+    return true;
+  } catch (error) {
+    log("error", `切换分支失败: ${error.message}`, options);
+    return false;
+  }
+};
+
+/**
+ * 暂存当前工作区的更改
+ * @param {string} message - 暂存信息
+ * @param {Object} options - 配置选项
+ * @param {boolean} options.debug - 是否打印调试日志
+ * @returns {Promise<boolean>} 是否暂存成功
+ */
+export const stashChanges = async (message = "", options = {}) => {
+  try {
+    const command = message
+      ? `git stash push -m "${message}"`
+      : "git stash push";
+    await execGitCommand(command);
+    log("info", "成功暂存工作区更改", options);
+    return true;
+  } catch (error) {
+    log("error", `暂存工作区更改失败: ${error.message}`, options);
+    return false;
+  }
+};
+
+/**
+ * 恢复暂存的更改
+ * @param {Object} options - 配置选项
+ * @param {boolean} options.debug - 是否打印调试日志
+ * @returns {Promise<boolean>} 是否恢复成功
+ */
+export const popStash = async (options = {}) => {
+  try {
+    await execGitCommand("git stash pop");
+    log("info", "成功恢复暂存的更改", options);
+    return true;
+  } catch (error) {
+    log("error", `恢复暂存的更改失败: ${error.message}`, options);
+    return false;
+  }
+};
+
+/**
+ * 获取暂存列表
+ * @returns {Promise<Array<{index: number, message: string}>>} 暂存列表
+ */
+export const getStashList = async () => {
+  try {
+    const { stdout } = await execGitCommand("git stash list --format='%gd %s'");
+    return stdout
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const [index, ...messageParts] = line.split(" ");
+        return {
+          index: parseInt(index.replace("stash@{", "").replace("}", "")),
+          message: messageParts.join(" "),
+        };
+      });
+  } catch (error) {
+    log("error", "获取暂存列表失败");
+    return [];
+  }
+};

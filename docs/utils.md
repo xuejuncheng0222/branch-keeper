@@ -14,6 +14,11 @@
   - [获取所有本地分支列表](#获取所有本地分支列表)
   - [删除指定分支](#删除指定分支)
   - [更新远程分支信息](#更新远程分支信息)
+  - [切换分支](#切换分支)
+- [暂存操作](#暂存操作)
+  - [暂存工作区更改](#暂存工作区更改)
+  - [恢复暂存的更改](#恢复暂存的更改)
+  - [获取暂存列表](#获取暂存列表)
 - [分支保护](#分支保护)
   - [检查分支是否是保护分支](#检查分支是否是保护分支)
 - [日志输出](#日志输出)
@@ -207,6 +212,87 @@ await updateRemoteBranch(false, { debug: true });
 **使用场景：**
 - 在获取远程分支前更新信息
 - 清理过时的远程分支引用
+
+### 切换分支
+
+#### checkoutBranch
+切换到指定分支。
+
+```javascript
+const success = await checkoutBranch("feature-branch", options, false);
+```
+
+**参数：**
+- `branch` (string): 目标分支名称
+- `options` (object): 配置选项
+  - `debug` (boolean): 是否开启调试日志
+- `force` (boolean): 是否强制切换（丢弃本地修改），默认为 false
+
+**返回：**
+- `Promise<boolean>`: 是否切换成功
+
+**使用场景：**
+- 切换到其他分支
+- 在切换分支前处理工作区更改
+
+## 暂存操作
+
+### 暂存工作区更改
+
+#### stashChanges
+暂存当前工作区的更改。
+
+```javascript
+const success = await stashChanges("暂存信息", { debug: true });
+```
+
+**参数：**
+- `message` (string): 暂存信息，可选
+- `options` (object): 配置选项
+  - `debug` (boolean): 是否开启调试日志
+
+**返回：**
+- `Promise<boolean>`: 是否暂存成功
+
+**使用场景：**
+- 临时保存工作区更改
+- 在切换分支前暂存未提交的更改
+
+### 恢复暂存的更改
+
+#### popStash
+恢复最近一次暂存的更改。
+
+```javascript
+const success = await popStash({ debug: true });
+```
+
+**参数：**
+- `options` (object): 配置选项
+  - `debug` (boolean): 是否开启调试日志
+
+**返回：**
+- `Promise<boolean>`: 是否恢复成功
+
+**使用场景：**
+- 恢复之前暂存的更改
+- 在切换分支后恢复工作区状态
+
+### 获取暂存列表
+
+#### getStashList
+获取所有暂存的列表。
+
+```javascript
+const stashList = await getStashList();
+```
+
+**返回：**
+- `Promise<Array<{index: number, message: string}>>`: 暂存列表
+
+**使用场景：**
+- 查看所有暂存的更改
+- 管理多个暂存记录
 
 ## 分支保护
 
