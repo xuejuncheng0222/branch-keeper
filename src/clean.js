@@ -5,90 +5,15 @@
 
 import {
   execGitCommand,
-  isGitRepository,
   getCurrentBranch,
-  /*branchExists,*/
-  hasUncommittedChanges,
   isProtectedBranch,
   log,
+  checkWorkingDirectory,
+  deleteBranch,
+  updateRemoteBranch,
 } from "./utils.js";
 
 import ora from "ora";
-
-/**
- * 检查工作目录状态 合并等操作需求工作区干净，删除分支的操作不需要
- * @param {boolean} checkCommit - 是否检查未提交的更改
- * @returns {Promise<boolean>} 是否可以继续操作
- */
-const checkWorkingDirectory = async (checkCommit = false) => {
-  if (!(await isGitRepository())) {
-    console.error("当前目录不是 Git 仓库");
-    return false;
-  }
-
-  if (checkCommit && (await hasUncommittedChanges())) {
-    console.error("工作区有未提交的更改，请先提交或暂存更改");
-    return false;
-  }
-
-  return true;
-};
-
-/**
- * 获取本地分支列表
- * @returns {Promise<string[]>} 本地分支列表
- */
-const getLocalBranches = async () => {
-  try {
-    // 获取所有的本地分支
-    const { stdout } = await execGitCommand(
-      "git branch --format='%(refname:short)'"
-    );
-    return stdout
-      .split("\n")
-      .map((name) => name.replace(/^'+|'+$/g, ""))
-      .filter(Boolean);
-  } catch (error) {
-    log("error", "获取本地分支列表失败");
-    return [];
-  }
-};
-
-/**
- * 删除分支
- * @param {string} branch - 分支名
- * @param {boolean} force - 是否强制删除
- * @returns {Promise<boolean>} 是否删除成功
- */
-const deleteBranch = async (branch, force = false) => {
-  try {
-    const command = force
-      ? `git branch -D ${branch}`
-      : `git branch -d ${branch}`;
-    await execGitCommand(command);
-    log("info", `成功删除分支: ${branch}`);
-    return true;
-  } catch (error) {
-    log("error", `删除分支 ${branch} 失败: ${error.message}`);
-    return false;
-  }
-};
-
-const updateRemoteBranch = async (silent, options) => {
-  // 先执行 git fetch -p 更新远程分支信息
-  try {
-    if (!silent) {
-      log("info", "正在更新远程分支信息...", options);
-    }
-    await execGitCommand("git fetch -p");
-    if (!silent) {
-      log("info", "远程分支信息更新完成", options);
-    }
-  } catch (error) {
-    log("error", `更新远程分支信息失败: ${error.message}`, options);
-    return;
-  }
-};
 
 /**
  * 清理本地分支

@@ -61,7 +61,7 @@ export const getCurrentBranch = async () => {
 };
 
 /**
- * 检查分支是否存在
+ * 检查本地分支是否存在
  * @param {string} branch - 分支名称
  * @returns {Promise<boolean>} 分支是否存在
  */
@@ -94,7 +94,7 @@ export const hasUncommittedChanges = async () => {
  * @param {string} branch - 分支名称
  * @returns {Promise<boolean>} 是否有未推送的提交
  */
-export const hasUnpushedCommits = async (branch) => {
+export const hasNotPushedCommits = async (branch) => {
   try {
     const { stdout } = await execGitCommand(
       `git log ${branch} --not --remotes`
@@ -118,7 +118,7 @@ export const isProtectedBranch = (branch, protectedBranches) => {
 
 /**
  * 格式化日志输出
- * @param {string} level - 日志级别
+ * @param {info|error|warn} level - 日志级别
  * @param {string} message - 日志消息
  * @param {object} [options] - 日志选项（如 debug）
  * @param {...any} args - 额外参数
@@ -132,4 +132,85 @@ export const log = (level, message, options = {}, ...args) => {
   const timestamp = new Date().toLocaleString();
   const prefix = `[${timestamp}] ${level.toUpperCase()}:`;
   console.log(prefix, message, ...args);
+};
+
+/**
+ * 检查工作目录状态 合并等操作需求工作区干净，删除分支的操作不需要
+ * @param {boolean} checkCommit - 是否检查未提交的更改，默认false
+ * @returns {Promise<boolean>} 是否可以继续操作
+ */
+export const checkWorkingDirectory = async (checkCommit = false) => {
+  if (!(await isGitRepository())) {
+    console.error("当前目录不是 Git 仓库");
+    return false;
+  }
+
+  if (checkCommit && (await hasUncommittedChanges())) {
+    console.error("工作区有未提交的更改，请先提交或暂存更改");
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * 获取本地分支列表
+ * @returns {Promise<string[]>} 本地分支列表
+ */
+export const getLocalBranches = async () => {
+  try {
+    // 获取所有的本地分支
+    const { stdout } = await execGitCommand(
+      "git branch --format='%(refname:short)'"
+    );
+    return stdout
+      .split("\n")
+      .map((name) => name.replace(/^'+|'+$/g, ""))
+      .filter(Boolean);
+  } catch (error) {
+    log("error", "获取本地分支列表失败");
+    return [];
+  }
+};
+
+/**
+ * 删除分支
+ * @param {string} branch - 分支名
+ * @param {boolean} force - 是否强制删除
+ * @returns {Promise<boolean>} 是否删除成功
+ */
+export const deleteBranch = async (branch, force = false) => {
+  try {
+    const command = force
+      ? `git branch -D ${branch}`
+      : `git branch -d ${branch}`;
+    await execGitCommand(command);
+    log("info", `成功删除分支: ${branch}`);
+    return true;
+  } catch (error) {
+    log("error", `删除分支 ${branch} 失败: ${error.message}`);
+    return false;
+  }
+};
+
+/**
+ * 更新远程分支信息
+ * @param {*} silent 是否静默模式
+ * @param {*} options 参数 options.debug
+ * @returns
+ */
+export const updateRemoteBranch = async (silent, options) => {
+  // 先执行 git fetch -p 更新远程分支信息
+  try {
+    if (!silent) {
+      log("info", "正在更新远程分支信息...", options);
+    }
+    await execGitCommand("git fetch -p");
+    if (!silent) {
+      log("info", "远程分支信息更新完成", options);
+    }
+  } catch (error) {
+    log("error", `更新远程分支信息失败: ${error.message}`, options);
+    return;
+  }
 };

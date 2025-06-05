@@ -2,9 +2,10 @@
 
 import { program } from "commander";
 import { cleanBranches } from "../src/clean.js";
-import { mergeToBranches } from "../src/merge.js";
-import { fetchAllBranches } from "../src/fetch.js";
+// import { mergeToBranches } from "../src/merge.js";
+// import { fetchAllBranches } from "../src/fetch.js";
 import { loadConfig } from "../src/config.js";
+import { deleteBranches } from "../src/delete.js";
 
 /**
  * 处理命令执行错误
@@ -77,50 +78,58 @@ program
     }
   });
 
-// Merge 命令
 program
-  .command("merge")
-  .description("将源分支的更改合并到一个或多个本地分支")
-  .requiredOption("--source <branch>", "源分支名称")
-  .option("--target <branches...>", "目标分支列表", [])
-  .option("--exclude <branches...>", "要排除的分支列表", [])
-  .option("--no-ff", "禁用快进合并")
+  .command("delete")
+  .description("交互式删除分支")
+  .option("-f, --force", "强制删除未合并的分支")
+  .option("-m, --multi", "允许多选删除")
   .option("--debug", "打印调试日志")
-  .action(async (options) => {
-    try {
-      const config = loadConfig(options);
-      const finalOptions = {
-        ...options,
-        ffOnly: options.ff ?? config.ffOnly ?? true,
-        debug: options.debug ?? config.debug ?? false,
-      };
-      await mergeToBranches(finalOptions);
-    } catch (error) {
-      handleCommandError(error, "merge");
-    }
-  });
+  .action(deleteBranches);
+
+// // Merge 命令
+// program
+//   .command("merge")
+//   .description("将源分支的更改合并到一个或多个本地分支")
+//   .requiredOption("--source <branch>", "源分支名称")
+//   .option("--target <branches...>", "目标分支列表", [])
+//   .option("--exclude <branches...>", "要排除的分支列表", [])
+//   .option("--no-ff", "禁用快进合并")
+//   .option("--debug", "打印调试日志")
+//   .action(async (options) => {
+//     try {
+//       const config = loadConfig(options);
+//       const finalOptions = {
+//         ...options,
+//         ffOnly: options.ff ?? config.ffOnly ?? true,
+//         debug: options.debug ?? config.debug ?? false,
+//       };
+//       await mergeToBranches(finalOptions);
+//     } catch (error) {
+//       handleCommandError(error, "merge");
+//     }
+//   });
 
 // Fetch 命令
-program
-  .command("fetch")
-  .description("拉取所有远程分支并创建本地跟踪分支")
-  .option("--remote <name>", "远程仓库名称 (默认: origin)", "origin")
-  .option("--ignore <branches...>", "拉取时要忽略的分支", [])
-  .option("--force", "强制更新已存在的本地分支")
-  .option("--debug", "打印调试日志")
-  .action(async (options) => {
-    try {
-      const config = loadConfig(options);
-      const finalOptions = {
-        ...options,
-        force: options.force ?? config.force ?? false,
-        debug: options.debug ?? config.debug ?? false,
-      };
-      await fetchAllBranches(finalOptions);
-    } catch (error) {
-      handleCommandError(error, "fetch");
-    }
-  });
+// program
+//   .command("fetch")
+//   .description("拉取所有远程分支并创建本地跟踪分支")
+//   .option("--remote <name>", "远程仓库名称 (默认: origin)", "origin")
+//   .option("--ignore <branches...>", "拉取时要忽略的分支", [])
+//   .option("--force", "强制更新已存在的本地分支")
+//   .option("--debug", "打印调试日志")
+//   .action(async (options) => {
+//     try {
+//       const config = loadConfig(options);
+//       const finalOptions = {
+//         ...options,
+//         force: options.force ?? config.force ?? false,
+//         debug: options.debug ?? config.debug ?? false,
+//       };
+//       await fetchAllBranches(finalOptions);
+//     } catch (error) {
+//       handleCommandError(error, "fetch");
+//     }
+//   });
 
 // 添加帮助信息
 program.addHelpText(
