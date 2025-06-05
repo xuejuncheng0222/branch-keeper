@@ -1,6 +1,6 @@
 {
   "name": "branch-keeper",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Git 分支管理工具",
   "type": "module",
   "main": "bin/bk.js",
